@@ -1,0 +1,1 @@
+cmd_/home/nthanhhuy/Desktop/test/hello.ko := ld -r -m elf_x86_64 -z max-page-size=0x200000 -T ./scripts/module-common.lds --build-id  -o /home/nthanhhuy/Desktop/test/hello.ko /home/nthanhhuy/Desktop/test/hello.o /home/nthanhhuy/Desktop/test/hello.mod.o ;  true
