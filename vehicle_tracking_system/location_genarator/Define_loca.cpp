@@ -7,6 +7,8 @@
 #include <pthread.h> 
 #include "Define_loca.h"
 #include <stdlib.h>
+#include "tinyxml.h"
+#include "unistd.h"
 using namespace std;
 
                     /* Send data from sensor to VTS for user */
@@ -92,6 +94,10 @@ void *Recv_from_ad (void *arg)
     DataStruct sensor1;
     DataStruct sensor2;
     DataStruct sensor3;
+    SenSor_Data_Struct Data_SenSors;
+    Data_SenSors.sensor1 = sensor1;
+    Data_SenSors.sensor2 = sensor2;
+    Data_SenSors.sensor3 = sensor3;
     sensor1.flag = 1;
     strcpy(sensor1.Name,"SenSor1");
     //sensor1.Name = SenSor1;
@@ -102,6 +108,7 @@ void *Recv_from_ad (void *arg)
     pthread_t sensor1_thread;
     pthread_t sensor2_thread;
     pthread_t sensor3_thread;
+    pthread_t CreateXml;    
     char buffer[100];
     sockaddr_in server_addr;
     int opt =1; 
@@ -132,6 +139,7 @@ void *Recv_from_ad (void *arg)
     listen(listenfd,3); // waiting for connection maximum 3 geue
     newsocket = accept(listenfd,(sockaddr*) &server_addr,(socklen_t*)&addr_lenght);
     cout << "da ket noi" << "\n";
+    pthread_create(&CreateXml,NULL,Write_Xml,&Data_SenSors);
     while(1)
     {
         read(newsocket,&buffer,sizeof(buffer));
@@ -163,6 +171,75 @@ void *Recv_from_ad (void *arg)
         //pthread_join (sensor1_thread,NULL);
     }
 }
+void *Write_Xml(void* arg)
+{
+    SenSor_Data_Struct* temp = (SenSor_Data_Struct*) arg;
+    //Tạo đối tượng quản lý tài liệu XML
+	TiXmlDocument doc;
+
+	//Tạo chỉ thị của tài liệu XML bao gồm version, endcoding sau đó thêm dec vào tài liệu
+	TiXmlDeclaration *dec = new TiXmlDeclaration("1.0", "utf-8", "");
+	//Thêm dec vào tài liệu
+	doc.LinkEndChild(dec);
+
+	//Tạo comment và thêm comment vào tài liệu
+	TiXmlComment *cmt = new TiXmlComment("Demo read, write, edit XML document using TinyXML library");
+	doc.LinkEndChild(cmt);
+
+	//Tạo node root và thêm root vào tài liệu
+	TiXmlElement* root = new TiXmlElement("Authors");
+	doc.LinkEndChild(root);
+   
+    while(1)
+    {
+        //Tạo Author1
+	    TiXmlElement* author1 = new TiXmlElement(temp->sensor1.Name);
+	    //Set id cho author1
+	    author1->SetAttribute("Id", temp->sensor1.ID);
+	    //Thêm author1 vào root
+	    root->LinkEndChild(author1);
+
+
+	    //Tạo Author2
+	    TiXmlElement* author2 = new TiXmlElement(temp->sensor2.Name);
+	    //Set id cho author2
+	    author2->SetAttribute("id",temp->sensor2.ID);
+	    //Thêm author2 vào root
+	    root->LinkEndChild(author2);
+
+        //Tao Author3
+        TiXmlElement* author3 = new TiXmlElement(temp->sensor3.Name);
+        //Set ID for author2 
+        author3->SetAttribute("id",temp->sensor3.ID);
+        //add author3 to Root
+        root->LinkEndChild(author3);
+
+	    //Tạo node Name 
+	    TiXmlElement* author1_name = new TiXmlElement(temp->sensor1.Name);
+	    author1->LinkEndChild(author1_name);
+	    TiXmlText* name_content_1 = new TiXmlText(temp->sensor1.Name);
+	    author1_name->LinkEndChild(name_content_1);
+
+        TiXmlElement* author1_Status = new TiXmlElement(temp->sensor1.status);
+	    author1->LinkEndChild(author1_Status);
+	    TiXmlText* Status_content_1 = new TiXmlText(temp->sensor1.status);
+	    author1_Status->LinkEndChild(Status_content_1);
+
+        TiXmlElement* author1_lag = new TiXmlElement("Lag");
+        author1_lag->SetAttribute("Lag",temp->sensor1.lagi);
+        author1->LinkEndChild(author1_lag);
+
+        TiXmlElement* author1_log = new TiXmlElement("Log");
+        author1_lag->SetAttribute("Log",temp->sensor1.longi);
+        author1->LinkEndChild(author1_log);
+        sleep(6);
+    }
+    
+	doc.SaveFile("Authors_Write.xml");
+	return 0;    
+}
+
+
 
 
                         /*create connection from location_generator to VTS*/
