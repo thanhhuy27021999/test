@@ -25,7 +25,7 @@ void *Admin_th (void *arg)
     memset(&serv_addr,0,sizeof(serv_addr));
     sock = socket(AF_INET,SOCK_STREAM, 0);
     // bind the add to socket
-    if(inet_pton(AF_INET, "192.168.0.51", &serv_addr.sin_addr) <= 0)  
+    if(inet_pton(AF_INET, "192.168.122.1", &serv_addr.sin_addr) <= 0)  
     { 
         cout<<"\nInvalid address/ Address not supported \n"; 
         return 0; 
@@ -56,13 +56,7 @@ void func(int sockfd)
 		//printf("Me: "); 
 		n = 0; 
 		while ((buff[n++] = getchar()) != '\n'); 
-		write(sockfd, buff, sizeof(buff)); 
-        if ((strncmp(buff, "close1", 6)) == 0) 
-        { 
-            //strcpy(CHECK,buff);
-			printf("Admin Exit...\n"); 
-			//break; 
-		}  
+		write(sockfd, buff, sizeof(buff));  
 	} 
 } 
 
@@ -83,7 +77,7 @@ void *My_thread_1 (void *arg)
        // buff_temp = buff.GetStatus();
         if(!strncmp(buff.GetStatus(), "exit",sizeof("exit")-1))
         {
-            cout <<"Da exit"<<buff.GetStatus()<<"\n";
+            cout <<"Da exit....  "<<buff.GetStatus()<<"\n";
             cnt--;
             for(int i=0; i<30;i++)
             {
@@ -101,7 +95,7 @@ void *My_thread_1 (void *arg)
              close(newarg); 
 		 	break;         
         }
-        buff.Xuat();
+        //buff.Xuat();
         write(newarg,message,sizeof(message));
 		bzero(&buff, sizeof(buff)); 
 	}  
@@ -121,17 +115,6 @@ void *My_thread (void *arg)
 		bzero(buff, sizeof(buff)); 
         read(newarg, buff, sizeof(buff)); 
         write(newarg, buff, sizeof(buff)); //tranfer data 
-        // strcpy(buff_T,"Ip ");
-        // strcat(buff_T,inet_ntoa(temp.sin_addr));
-        // strcat(buff_T,":");
-        // strcat(buff_T,buff);
-        // for(int i=0; i<30; i++)
-        // {
-        //     if(client_socket[i] == 0)
-        //     break;
-        //     write(client_socket[i], buff_T, sizeof(buff_T)); 
-        // }
-        //write(newarg,buff,sizeof(buff));
         if ((strncmp(buff, "exit", 4)) == 0) 
         { 
 			printf("Client Exit...\n");
@@ -382,12 +365,12 @@ void *End_user_1 (void *arg)
      
         //wait for an activity on one of the sockets , timeout is NULL ,  
         //so wait indefinitely  
-        activity = select( max_sd + 1 , &readfds , NULL , NULL , &timeout);   //block chuong trinh tai day de doi
-        if (activity == 0 && cnt==0 && escape==0)
-        { 
-            close(master_socket);
-            break;
-        }     
+        activity = select( max_sd + 1 , &readfds , NULL , NULL , NULL);   //block chuong trinh tai day de doi
+        // if (activity == 0 && cnt==0 && escape==0)
+        // { 
+        //     close(master_socket);
+        //     break;
+        //}     
         if ((activity < 0) && (errno!=EINTR))   
         {   
             printf("select error");   
@@ -427,25 +410,25 @@ void *End_user_1 (void *arg)
 
                     /*Define function for class DataStruct*/
 
-void DataStruct::SetCoordinate()
-{
-    longi = rand();
-    lagi = rand();
-}   
-void DataStruct::SetID (int *arg)
-{
-    srand((int)time(0));
-    *arg = rand();
-    ID = (*arg);
-}
-char* DataStruct::SetName(char *arg)
-{
-    strcpy(Name,"Huy");
-}
-void DataStruct::SetStatus(char*arg)
-{
-    strcpy(status,arg);
-}
+// void DataStruct::SetCoordinate()
+// {
+//     longi = rand();
+//     lagi = rand();
+// }   
+// void DataStruct::SetID (int *arg)
+// {
+//     srand((int)time(0));
+//     *arg = rand();
+//     ID = (*arg);
+// }
+// char* DataStruct::SetName(char *arg)
+// {
+//     strcpy(Name,"Huy");
+// }
+//  void DataStruct::SetStatus(char*arg)
+// {
+//     strcpy(status,arg);
+// }
 
 void DataStruct:: Xuat() 
 {

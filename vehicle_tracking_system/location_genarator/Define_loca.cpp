@@ -20,11 +20,11 @@ void *Add_Sensor(void *arg)
     char status_exit[] = "exit";
     char message[20] = "OKE";
     char buff[20];
-    cout << "welcome" <<temp->Name<<"\n";
+    cout << "welcome " <<temp->Name<<"\n";
     int sock;
     sock = ConnectToVts();
     //DataStruct DataSensor;
-    while(temp->Name == 0)
+    while(temp->flag == 0)
     {
         temp->SetStatus(status_open);
         temp->SetID(&a);
@@ -55,15 +55,12 @@ void *Add_Sensor(void *arg)
 
 void DataStruct::SetCoordinate()
 {
-    srand((int)time(0));
     longi = rand();
     lagi = rand();
 }   
 void DataStruct::SetID (int *arg)
 {
-    srand((int)time(0));
-    *arg = rand();
-    ID = (*arg);
+    ID = rand()%100+1;
 }
 char* DataStruct::SetName(char *arg)
 {
@@ -140,7 +137,6 @@ void *Recv_from_ad (void *arg)
         read(newsocket,&buffer,sizeof(buffer));
         if (!strncmp(buffer,"open1", sizeof("open1") - 1) && sensor1.flag!=0)
         {
-            cout << "..." << "\n";
             sensor1.flag = FALSE;
             pthread_create(&sensor1_thread,NULL,Add_Sensor,&sensor1);
         }
@@ -148,7 +144,6 @@ void *Recv_from_ad (void *arg)
         {
             sensor1.flag = TRUE;
             pthread_join(sensor1_thread,NULL);
-           // pthread_exit()
         }
 
         if (!strncmp(buffer,"open2", sizeof("open2") - 1)&& sensor2.flag!=0)
@@ -179,7 +174,7 @@ int ConnectToVts()
     memset(&serv_addr,0,sizeof(serv_addr));
     sock = socket(AF_INET,SOCK_STREAM, 0);
     // bind the add to socket
-    if(inet_pton(AF_INET, "192.168.0.51", &serv_addr.sin_addr) <= 0)  
+    if(inet_pton(AF_INET, "192.168.122.1", &serv_addr.sin_addr) <= 0)  
     { 
         cout<<"\nInvalid address/ Address not supported \n"; 
         return 0; 

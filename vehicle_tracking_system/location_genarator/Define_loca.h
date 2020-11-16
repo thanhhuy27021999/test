@@ -28,4 +28,6 @@ class DataStruct
         void SetID (int *arg);
         void SetCoordinate ();
         void SetStatus(char *arg);
+        void Xuat();
+        char* GetStatus();
 };
