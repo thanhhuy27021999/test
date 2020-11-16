@@ -13,33 +13,41 @@ using namespace std;
                     
 void *Add_Sensor(void *arg)
 {
-    int flag = *(int*)(arg);
+    DataStruct* temp  = (DataStruct*)(arg);
     int a;
-    char name[]= "123";
-    char status[] = "SS1";
+    //char name[]= "SS1";
+    char status_open[] = "OPEN";
     char status_exit[] = "exit";
-    //DataSensor DataSensor1;
-    cout << "welcom to ss1" <<"\n";
+    char message[20] = "OKE";
+    char buff[20];
+    cout << "welcome" <<temp->Name<<"\n";
     int sock;
     sock = ConnectToVts();
-    DataStruct DataSensor1;
-    while(flag == 0)
+    //DataStruct DataSensor;
+    while(temp->Name == 0)
     {
-        DataSensor1.SetName(status);
-        DataSensor1.SetID(&a);
-        DataSensor1.SetName(name);
-        DataSensor1.SetCoordinate();
-        write(sock,&DataSensor1,sizeof(DataSensor1));
-        flag = *(int *)(arg);
+        temp->SetStatus(status_open);
+        temp->SetID(&a);
+        //temp.SetName(temp.Name);
+        temp->SetCoordinate();
+        write(sock,temp,sizeof(DataStruct));
+        read(sock,buff,sizeof(buff));
+        if(strncmp(buff,"OKE",sizeof("OKE")-1)!= 0) // nhan error
+        {
+            temp->flag ==1;
+            break;
+        }
+       // temp = *(Name_SenSor*)(arg);
     }
-    if(flag == 1)
+    if(temp->flag == 1)
     {
-        DataSensor1.SetName(status_exit);
-        DataSensor1.SetID(&a);
-        DataSensor1.SetName(name);
-        write(sock,&DataSensor1,sizeof(DataSensor1));
+        cout << "SS2 send exit" <<"\n";
+        temp->SetStatus(status_exit);
+        temp->SetID(&a);
+        //temp.SetName(temp.Name);
+        temp->SetCoordinate();
+        write(sock,temp,sizeof(DataStruct));
     }
-
     close(sock);
 }
 
@@ -57,9 +65,14 @@ void DataStruct::SetID (int *arg)
     *arg = rand();
     ID = (*arg);
 }
-void DataStruct::SetName(char *arg)
+char* DataStruct::SetName(char *arg)
 {
     strcpy(Name,arg);
+    return Name;
+}
+void DataStruct::SetStatus(char*arg)
+{
+    strcpy(status,arg);
 }
 
                     /*create a thread for sensor*/
@@ -76,8 +89,22 @@ void DataStruct::SetName(char *arg)
 
 void *Recv_from_ad (void *arg)
 {
-    int flag = 0;
+    // Name_SenSor sensor1; 
+    // Name_SenSor sensor2;
+    // Name_SenSor sensor3;
+    DataStruct sensor1;
+    DataStruct sensor2;
+    DataStruct sensor3;
+    sensor1.flag = 1;
+    strcpy(sensor1.Name,"SenSor1");
+    //sensor1.Name = SenSor1;
+    sensor2.flag = 1;
+    strcpy(sensor2.Name,"SenSor2");
+    sensor3.flag = 1;
+    strcpy(sensor3.Name,"SenSor3");
     pthread_t sensor1_thread;
+    pthread_t sensor2_thread;
+    pthread_t sensor3_thread;
     char buffer[100];
     sockaddr_in server_addr;
     int opt =1; 
@@ -107,27 +134,34 @@ void *Recv_from_ad (void *arg)
     //NOTE: in server you must bind the Ip add for it, in client you just connect to server by server add
     listen(listenfd,3); // waiting for connection maximum 3 geue
     newsocket = accept(listenfd,(sockaddr*) &server_addr,(socklen_t*)&addr_lenght);
+    cout << "da ket noi" << "\n";
     while(1)
     {
-        //printf("FLAG = %d\n", flag);
         read(newsocket,&buffer,sizeof(buffer));
-        // printf("was read:");
-        // for (int i = 0; i < 10; i++)
-        // {
-        //     printf("%d %c, ", buffer[i], buffer[i]);
-        // }
-
-        // printf("\012");
-        if (!strncmp(buffer,"open1", sizeof("open1") - 1))
+        if (!strncmp(buffer,"open1", sizeof("open1") - 1) && sensor1.flag!=0)
         {
-            //printf(".... = %d\n", flag);
-            flag = FALSE;
-            //newthread(&sensor1_thread);
-            pthread_create(&sensor1_thread,NULL,Add_Sensor,&flag);
+            cout << "..." << "\n";
+            sensor1.flag = FALSE;
+            pthread_create(&sensor1_thread,NULL,Add_Sensor,&sensor1);
         }
         if (!strncmp(buffer,"close1", sizeof("close1") - 1))
         {
-            flag = TRUE;
+            sensor1.flag = TRUE;
+            pthread_join(sensor1_thread,NULL);
+           // pthread_exit()
+        }
+
+        if (!strncmp(buffer,"open2", sizeof("open2") - 1)&& sensor2.flag!=0)
+        {
+            sensor2.flag = FALSE;
+            pthread_create(&sensor2_thread,NULL,Add_Sensor,&sensor2);
+        }
+
+        if (!strncmp(buffer,"close2", sizeof("close2") - 1)&&sensor3.flag!=0)
+        {
+            sensor2.flag = TRUE;
+            pthread_join(sensor2_thread,NULL);
+
         }
         bzero(buffer, sizeof(buffer));
 
@@ -145,7 +179,7 @@ int ConnectToVts()
     memset(&serv_addr,0,sizeof(serv_addr));
     sock = socket(AF_INET,SOCK_STREAM, 0);
     // bind the add to socket
-    if(inet_pton(AF_INET, "192.168.83.10", &serv_addr.sin_addr) <= 0)  
+    if(inet_pton(AF_INET, "192.168.0.51", &serv_addr.sin_addr) <= 0)  
     { 
         cout<<"\nInvalid address/ Address not supported \n"; 
         return 0; 
