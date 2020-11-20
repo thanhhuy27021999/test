@@ -5,10 +5,12 @@
 #include <unistd.h> 
 #include <string.h> 
 #include <pthread.h> 
-#include "Define_loca.h"
 #include <stdlib.h>
 #include "tinyxml.h"
 #include "unistd.h"
+#include "Define_loca.h"
+#include "ctime"
+DataStruct sensor[3];
 using namespace std;
 
                     /* Send data from sensor to VTS for user */
@@ -19,7 +21,7 @@ void *Add_Sensor(void *arg)
     int a;
     //char name[]= "SS1";
     char status_open[] = "OPEN";
-    char status_exit[] = "exit";
+    char status_exit[] = "CLOSE";
     char message[20] = "OKE";
     char buff[20];
     cout << "welcome " <<temp->Name<<"\n";
@@ -43,11 +45,11 @@ void *Add_Sensor(void *arg)
     }
     if(temp->flag == 1)
     {
-        cout << "SS2 send exit" <<"\n";
+        cout << temp->Name<<" exit" <<"\n";
         temp->SetStatus(status_exit);
-        temp->SetID(&a);
-        //temp.SetName(temp.Name);
-        temp->SetCoordinate();
+        temp->lagi = 0;
+        temp->longi = 0;
+        temp->ID = 0;
         write(sock,temp,sizeof(DataStruct));
     }
     close(sock);
@@ -91,20 +93,15 @@ void *Recv_from_ad (void *arg)
     // Name_SenSor sensor1; 
     // Name_SenSor sensor2;
     // Name_SenSor sensor3;
-    DataStruct sensor1;
-    DataStruct sensor2;
-    DataStruct sensor3;
-    SenSor_Data_Struct Data_SenSors;
-    Data_SenSors.sensor1 = sensor1;
-    Data_SenSors.sensor2 = sensor2;
-    Data_SenSors.sensor3 = sensor3;
-    sensor1.flag = 1;
-    strcpy(sensor1.Name,"SenSor1");
+    //DataStruct sensor2;
+    //DataStruct sensor3;
+    sensor[0].flag = 1;
+    strcpy(sensor[0].Name,"SenSor1");
     //sensor1.Name = SenSor1;
-    sensor2.flag = 1;
-    strcpy(sensor2.Name,"SenSor2");
-    sensor3.flag = 1;
-    strcpy(sensor3.Name,"SenSor3");
+    sensor[1].flag = 1;
+    strcpy(sensor[1].Name,"SenSor2");
+    sensor[2].flag = 1;
+    strcpy(sensor[2].Name,"SenSor3");
     pthread_t sensor1_thread;
     pthread_t sensor2_thread;
     pthread_t sensor3_thread;
@@ -139,32 +136,44 @@ void *Recv_from_ad (void *arg)
     listen(listenfd,3); // waiting for connection maximum 3 geue
     newsocket = accept(listenfd,(sockaddr*) &server_addr,(socklen_t*)&addr_lenght);
     cout << "da ket noi" << "\n";
-    pthread_create(&CreateXml,NULL,Write_Xml,&Data_SenSors);
+    pthread_create(&CreateXml,NULL,Write_Xml,NULL);
     while(1)
     {
         read(newsocket,&buffer,sizeof(buffer));
-        if (!strncmp(buffer,"open1", sizeof("open1") - 1) && sensor1.flag!=0)
+        if (!strncmp(buffer,"open1", sizeof("open1") - 1) && sensor[0].flag!=0)
         {
-            sensor1.flag = FALSE;
-            pthread_create(&sensor1_thread,NULL,Add_Sensor,&sensor1);
+            sensor[0].flag = FALSE;
+            pthread_create(&sensor1_thread,NULL,Add_Sensor,&sensor[0]);
         }
         if (!strncmp(buffer,"close1", sizeof("close1") - 1))
         {
-            sensor1.flag = TRUE;
+            sensor[0].flag = TRUE;
             pthread_join(sensor1_thread,NULL);
         }
 
-        if (!strncmp(buffer,"open2", sizeof("open2") - 1)&& sensor2.flag!=0)
+        if (!strncmp(buffer,"open2", sizeof("open2") - 1)&& sensor[1].flag!=0)
         {
-            sensor2.flag = FALSE;
-            pthread_create(&sensor2_thread,NULL,Add_Sensor,&sensor2);
+            sensor[1].flag = FALSE;
+            pthread_create(&sensor2_thread,NULL,Add_Sensor,&sensor[1]);
         }
 
-        if (!strncmp(buffer,"close2", sizeof("close2") - 1)&&sensor3.flag!=0)
+        if (!strncmp(buffer,"close2", sizeof("close2") - 1))
         {
-            sensor2.flag = TRUE;
+            sensor[1].flag = TRUE;
             pthread_join(sensor2_thread,NULL);
 
+        }
+
+        if (!strncmp(buffer,"open3", sizeof("open3") - 1) && sensor[2].flag!=0)
+        {
+            sensor[2].flag = FALSE;
+            pthread_create(&sensor1_thread,NULL,Add_Sensor,&sensor[2]);
+        }
+
+        if (!strncmp(buffer,"close3", sizeof("close3") - 1))
+        {
+            sensor[2].flag = TRUE;
+            pthread_join(sensor1_thread,NULL);
         }
         bzero(buffer, sizeof(buffer));
 
@@ -173,7 +182,6 @@ void *Recv_from_ad (void *arg)
 }
 void *Write_Xml(void* arg)
 {
-    SenSor_Data_Struct* temp = (SenSor_Data_Struct*) arg;
     //Tạo đối tượng quản lý tài liệu XML
 	TiXmlDocument doc;
 
@@ -189,53 +197,47 @@ void *Write_Xml(void* arg)
 	//Tạo node root và thêm root vào tài liệu
 	TiXmlElement* root = new TiXmlElement("Authors");
 	doc.LinkEndChild(root);
-   
     while(1)
     {
-        //Tạo Author1
-	    TiXmlElement* author1 = new TiXmlElement(temp->sensor1.Name);
-	    //Set id cho author1
-	    author1->SetAttribute("Id", temp->sensor1.ID);
-	    //Thêm author1 vào root
-	    root->LinkEndChild(author1);
+        time_t now = time(0);
+        char* Time = ctime(&now);
+        char buffer[20];
+        strncpy(buffer,Time,(strnlen(Time,50)-1));
+        for(int i=0; i<3;i++)
+        {
+            //Tạo Author1
+            TiXmlElement* author = new TiXmlElement(sensor[i].Name);
+            //Set id cho author1
+            author->SetAttribute("Id", sensor[i].ID);
+            //Thêm author1 vào root
+            root->LinkEndChild(author);
+            //Tạo node Name 
+            TiXmlElement* author_name = new TiXmlElement("Name");
+            author->LinkEndChild(author_name);
+            TiXmlText* name_content = new TiXmlText(sensor[i].Name);
+            author_name->LinkEndChild(name_content);
 
+            TiXmlElement* author_Status = new TiXmlElement("Status");
+            author->LinkEndChild(author_Status);
+            TiXmlText* Status_content = new TiXmlText(sensor[i].status);
+            author_Status->LinkEndChild(Status_content);
 
-	    //Tạo Author2
-	    TiXmlElement* author2 = new TiXmlElement(temp->sensor2.Name);
-	    //Set id cho author2
-	    author2->SetAttribute("id",temp->sensor2.ID);
-	    //Thêm author2 vào root
-	    root->LinkEndChild(author2);
+            TiXmlElement* author_Date_Time = new TiXmlElement("Date and Time");
+            author->LinkEndChild(author_Date_Time);
+            TiXmlText* Date_Time_content = new TiXmlText(buffer);
+            author_Date_Time->LinkEndChild(Date_Time_content);
 
-        //Tao Author3
-        TiXmlElement* author3 = new TiXmlElement(temp->sensor3.Name);
-        //Set ID for author2 
-        author3->SetAttribute("id",temp->sensor3.ID);
-        //add author3 to Root
-        root->LinkEndChild(author3);
-
-	    //Tạo node Name 
-	    TiXmlElement* author1_name = new TiXmlElement(temp->sensor1.Name);
-	    author1->LinkEndChild(author1_name);
-	    TiXmlText* name_content_1 = new TiXmlText(temp->sensor1.Name);
-	    author1_name->LinkEndChild(name_content_1);
-
-        TiXmlElement* author1_Status = new TiXmlElement(temp->sensor1.status);
-	    author1->LinkEndChild(author1_Status);
-	    TiXmlText* Status_content_1 = new TiXmlText(temp->sensor1.status);
-	    author1_Status->LinkEndChild(Status_content_1);
-
-        TiXmlElement* author1_lag = new TiXmlElement("Lag");
-        author1_lag->SetAttribute("Lag",temp->sensor1.lagi);
-        author1->LinkEndChild(author1_lag);
-
-        TiXmlElement* author1_log = new TiXmlElement("Log");
-        author1_lag->SetAttribute("Log",temp->sensor1.longi);
-        author1->LinkEndChild(author1_log);
-        sleep(6);
+            TiXmlElement* author_lag = new TiXmlElement("Lag");
+            author_lag->SetAttribute("Lag",sensor[i].lagi);
+            author->LinkEndChild(author_lag);
+            TiXmlElement* author_log = new TiXmlElement("Log");
+            author_log->SetAttribute("Log",sensor[i].longi);
+            author->LinkEndChild(author_log);    
+        }
+        doc.SaveFile("Authors_Write.xml");
+        sleep(5);
     }
-    
-	doc.SaveFile("Authors_Write.xml");
+   
 	return 0;    
 }
 

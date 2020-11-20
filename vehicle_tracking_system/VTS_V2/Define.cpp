@@ -6,6 +6,8 @@
 #include <string.h> 
 #include <pthread.h> 
 #include "Define.h"
+#include "ctime"
+#include "tinyxml.h"
 int cnt_Client;
 int escape_client;
 int client_socket_client[30];
@@ -14,9 +16,8 @@ int escape;
 int client_socket[30];
 struct sockaddr_in address;   
 struct timeval timeout;
+DataStruct sensor[3];
 using namespace std;
-
-
 
 void *Admin_th (void *arg)
 {
@@ -73,12 +74,25 @@ void *My_thread_1 (void *arg)
     { 
 		bzero(&buff, sizeof(buff)); 
         read(newarg, &buff, sizeof(buff)); 
+        if(!strncmp(buff.Name,"SenSor1",sizeof("SenSor1")-1))
+        {
+            sensor[0] = buff;
+        }
+        if (!strncmp(buff.Name,"SenSor2",sizeof("SenSor2")-1))
+        {
+            sensor[1] = buff;
+        }
+        if (!strncmp(buff.Name,"SenSor3",sizeof("SenSor3")-1))
+        {
+            sensor[2] = buff;
+        }
         //char buff_temp[20];
        // buff_temp = buff.GetStatus();
-        if(!strncmp(buff.GetStatus(), "exit",sizeof("exit")-1))
+        if(!strncmp(buff.status, "CLOSE",sizeof("CLOSE")-1))
         {
-            cout <<"Da exit....  "<<buff.GetStatus()<<"\n";
+            cout <<"Da exit....  "<<buff.Name<<"\n";
             cnt--;
+            cout <<cnt<<"\n";
             for(int i=0; i<30;i++)
             {
                  if(client_socket[i]==newarg)
@@ -92,10 +106,22 @@ void *My_thread_1 (void *arg)
                      break;
                  }
              }
-             close(newarg); 
-		 	break;         
-        }
-        //buff.Xuat();
+            if(!strncmp(buff.Name,"SenSor1",sizeof("SenSor1")-1))
+            {
+                bzero(&sensor[0],sizeof(DataStruct));
+            }
+            if (!strncmp(buff.Name,"SenSor2",sizeof("SenSor2")-1))
+            {
+                bzero(&sensor[1],sizeof(DataStruct));
+            }
+            if (!strncmp(buff.Name,"SenSor3",sizeof("SenSor3")-1))
+            {
+                bzero(&sensor[2],sizeof(DataStruct));
+            }
+                close(newarg); 
+                break;         
+            }
+
         write(newarg,message,sizeof(message));
 		bzero(&buff, sizeof(buff)); 
 	}  
@@ -115,7 +141,7 @@ void *My_thread (void *arg)
 		bzero(buff, sizeof(buff)); 
         read(newarg, buff, sizeof(buff)); 
         write(newarg, buff, sizeof(buff)); //tranfer data 
-        if ((strncmp(buff, "exit", 4)) == 0) 
+        if ((strncmp(buff, "CLOSE", (sizeof("CLOSE")-1))) == 0) 
         { 
 			printf("Client Exit...\n");
             cnt--;
@@ -276,6 +302,9 @@ void *End_user (void *arg)
 
 void *End_user_1 (void *arg)
 {
+    strcpy(sensor[0].Name,"SenSor1");
+    strcpy(sensor[1].Name,"SenSor2");
+    strcpy(sensor[2].Name,"SenSor3");
     escape = 1;
     cnt = 0;
     int opt = TRUE;   
@@ -285,7 +314,6 @@ void *End_user_1 (void *arg)
     pthread_t pt[30];         
     //set of socket descriptors  
     fd_set readfds;   
-         
     //a message  
     //char *message = "ECHO Daemon v1.0 \r\n";   
      
@@ -441,4 +469,64 @@ void DataStruct:: Xuat()
 char* DataStruct ::GetStatus()
 {
     return(status);
+}
+void *Write_Xml(void* arg)
+{
+    //Tạo đối tượng quản lý tài liệu XML
+	TiXmlDocument doc;
+
+	//Tạo chỉ thị của tài liệu XML bao gồm version, endcoding sau đó thêm dec vào tài liệu
+	TiXmlDeclaration *dec = new TiXmlDeclaration("1.0", "utf-8", "");
+	//Thêm dec vào tài liệu
+	doc.LinkEndChild(dec);
+
+	//Tạo comment và thêm comment vào tài liệu
+	TiXmlComment *cmt = new TiXmlComment("Demo read, write, edit XML document using TinyXML library");
+	doc.LinkEndChild(cmt);
+
+	//Tạo node root và thêm root vào tài liệu
+	TiXmlElement* root = new TiXmlElement("Authors");
+	doc.LinkEndChild(root);
+    while(1)
+    {
+        time_t now = time(0);
+        char* Time = ctime(&now);
+        char buffer[20];
+        strncpy(buffer,Time,(strnlen(Time,50)-1));
+        for(int i=0; i<3;i++)
+        {
+            //Tạo Author1
+            TiXmlElement* author = new TiXmlElement(sensor[i].Name);
+            //Set id cho author1
+            author->SetAttribute("Id", sensor[i].ID);
+            //Thêm author1 vào root
+            root->LinkEndChild(author);
+            //Tạo node Name 
+            TiXmlElement* author_name = new TiXmlElement("Name");
+            author->LinkEndChild(author_name);
+            TiXmlText* name_content = new TiXmlText(sensor[i].Name);
+            author_name->LinkEndChild(name_content);
+
+            TiXmlElement* author_Status = new TiXmlElement("Status");
+            author->LinkEndChild(author_Status);
+            TiXmlText* Status_content = new TiXmlText(sensor[i].status);
+            author_Status->LinkEndChild(Status_content);
+
+            TiXmlElement* author_Date_Time = new TiXmlElement("Date and Time");
+            author->LinkEndChild(author_Date_Time);
+            TiXmlText* Date_Time_content = new TiXmlText(buffer);
+            author_Date_Time->LinkEndChild(Date_Time_content);
+
+            TiXmlElement* author_lag = new TiXmlElement("Lag");
+            author_lag->SetAttribute("Lag",sensor[i].lagi);
+            author->LinkEndChild(author_lag);
+            TiXmlElement* author_log = new TiXmlElement("Log");
+            author_log->SetAttribute("Log",sensor[i].longi);
+            author->LinkEndChild(author_log);    
+        }
+        doc.SaveFile("Authors_Write.xml");
+        sleep(5);
+    }
+   
+	return 0;    
 }

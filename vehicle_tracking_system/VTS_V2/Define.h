@@ -20,9 +20,11 @@ void *My_thread_1 (void *arg);
 void *End_user (void *arg); //thread1
 void *End_user_1(void *arg);
 void *Admin_th (void *arg); //thread2
+void *Write_Xml(void* arg);
+//extern DataStruct sensor[3];
 class DataStruct
 {
-    private:
+    public:
         char status[20];
         int ID ;
         int lagi, longi;

@@ -11,12 +11,10 @@ void *Recv_from_ad (void *arg); //recieve request from VTS as a server
 void *Add_Sensor(void *arg); //create a connection from local_genarator to VTS as a client
 int ConnectToVts(); //sensor send data to VTS
 void *Write_Xml(void* arg);
-struct SenSor_Data_Struct
-{
-    DataStruct sensor1;
-    DataStruct sensor2;
-    DataStruct sensor3;
-};
+
+//DataStruct SenSor_Data[3];
+//DataStruct sensor[3];
+
 class DataStruct
 {
     public:

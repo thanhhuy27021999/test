@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--Demo read, write, edit XML document using TinyXML library-->
+<Authors>
+    <SenSor1 Id="0">
+        <Name>SenSor1</Name>
+        <Status></Status>
+        <Date and Time>Fri Nov 20 08:46:12 2020</Date and Time>
+        <Lag Lag="0" />
+        <Log Log="0" />
+    </SenSor1>
+    <SenSor2 Id="0">
+        <Name>SenSor2</Name>
+        <Status></Status>
+        <Date and Time>Fri Nov 20 08:46:12 2020</Date and Time>
+        <Lag Lag="0" />
+        <Log Log="0" />
+    </SenSor2>
+    <SenSor3 Id="0">
+        <Name>SenSor3</Name>
+        <Status></Status>
+        <Date and Time>Fri Nov 20 08:46:12 2020</Date and Time>
+        <Lag Lag="0" />
+        <Log Log="0" />
+    </SenSor3>
+    <SenSor1 Id="24">
+        <Name>SenSor1</Name>
+        <Status>OPEN</Status>
+        <Date and Time>Fri Nov 20 08:46:17 2020</Date and Time>
+        <Lag Lag="1041775161" />
+        <Log Log="2128259292" />
+    </SenSor1>
+    <SenSor2 Id="0">
+        <Name>SenSor2</Name>
+        <Status></Status>
+        <Date and Time>Fri Nov 20 08:46:17 2020</Date and Time>
+        <Lag Lag="0" />
+        <Log Log="0" />
+    </SenSor2>
+    <SenSor3 Id="0">
+        <Name>SenSor3</Name>
+        <Status></Status>
+        <Date and Time>Fri Nov 20 08:46:17 2020</Date and Time>
+        <Lag Lag="0" />
+        <Log Log="0" />
+    </SenSor3>
+    <SenSor1 Id="73">
+        <Name>SenSor1</Name>
+        <Status>OPEN</Status>
+        <Date and Time>Fri Nov 20 08:46:22 2020</Date and Time>
+        <Lag Lag="674520654" />
+        <Log Log="1053467196" />
+    </SenSor1>
+    <SenSor2 Id="94">
+        <Name>SenSor2</Name>
+        <Status>OPEN</Status>
+        <Date and Time>Fri Nov 20 08:46:22 2020</Date and Time>
+        <Lag Lag="408672441" />
+        <Log Log="631187634" />
+    </SenSor2>
+    <SenSor3 Id="0">
+        <Name>SenSor3</Name>
+        <Status></Status>
+        <Date and Time>Fri Nov 20 08:46:22 2020</Date and Time>
+        <Lag Lag="0" />
+        <Log Log="0" />
+    </SenSor3>
+    <SenSor1 Id="0">
+        <Name>SenSor1</Name>
+        <Status>CLOSE</Status>
+        <Date and Time>Fri Nov 20 08:46:27 2020</Date and Time>
+        <Lag Lag="0" />
+        <Log Log="0" />
+    </SenSor1>
+    <SenSor2 Id="25">
+        <Name>SenSor2</Name>
+        <Status>OPEN</Status>
+        <Date and Time>Fri Nov 20 08:46:27 2020</Date and Time>
+        <Lag Lag="1532564200" />
+        <Log Log="1853433909" />
+    </SenSor2>
+    <SenSor3 Id="16">
+        <Name>SenSor3</Name>
+        <Status>OPEN</Status>
+        <Date and Time>Fri Nov 20 08:46:27 2020</Date and Time>
+        <Lag Lag="1056687055" />
+        <Log Log="1392386773" />
+    </SenSor3>
+    <SenSor1 Id="0">
+        <Name>SenSor1</Name>
+        <Status>CLOSE</Status>
+        <Date and Time>Fri Nov 20 08:46:32 2020</Date and Time>
+        <Lag Lag="0" />
+        <Log Log="0" />
+    </SenSor1>
+    <SenSor2 Id="43">
+        <Name>SenSor2</Name>
+        <Status>OPEN</Status>
+        <Date and Time>Fri Nov 20 08:46:32 2020</Date and Time>
+        <Lag Lag="1352873123" />
+        <Log Log="244345795" />
+    </SenSor2>
+    <SenSor3 Id="72">
+        <Name>SenSor3</Name>
+        <Status>OPEN</Status>
+        <Date and Time>Fri Nov 20 08:46:32 2020</Date and Time>
+        <Lag Lag="548082646" />
+        <Log Log="1704452906" />
+    </SenSor3>
+    <SenSor1 Id="0">
+        <Name>SenSor1</Name>
+        <Status>CLOSE</Status>
+        <Date and Time>Fri Nov 20 08:46:37 2020</Date and Time>
+        <Lag Lag="0" />
+        <Log Log="0" />
+    </SenSor1>
+    <SenSor2 Id="89">
+        <Name>SenSor2</Name>
+        <Status>OPEN</Status>
+        <Date and Time>Fri Nov 20 08:46:37 2020</Date and Time>
+        <Lag Lag="888999699" />
+        <Log Log="237393825" />
+    </SenSor2>
+    <SenSor3 Id="88">
+        <Name>SenSor3</Name>
+        <Status>OPEN</Status>
+        <Date and Time>Fri Nov 20 08:46:37 2020</Date and Time>
+        <Lag Lag="628276311" />
+        <Log Log="2117035526" />
+    </SenSor3>
+    <SenSor1 Id="0">
+        <Name>SenSor1</Name>
+        <Status>CLOSE</Status>
+        <Date and Time>Fri Nov 20 08:46:42 2020</Date and Time>
+        <Lag Lag="0" />
+        <Log Log="0" />
+    </SenSor1>
+    <SenSor2 Id="61">
+        <Name>SenSor2</Name>
+        <Status>OPEN</Status>
+        <Date and Time>Fri Nov 20 08:46:42 2020</Date and Time>
+        <Lag Lag="623347302" />
+        <Log Log="1443110991" />
+    </SenSor2>
+    <SenSor3 Id="83">
+        <Name>SenSor3</Name>
+        <Status>OPEN</Status>
+        <Date and Time>Fri Nov 20 08:46:42 2020</Date and Time>
+        <Lag Lag="1216407535" />
+        <Log Log="1009829535" />
+    </SenSor3>
+    <SenSor1 Id="0">
+        <Name>SenSor1</Name>
+        <Status>CLOSE</Status>
+        <Date and Time>Fri Nov 20 08:46:47 2020</Date and Time>
+        <Lag Lag="0" />
+        <Log Log="0" />
+    </SenSor1>
+    <SenSor2 Id="42">
+        <Name>SenSor2</Name>
+        <Status>OPEN</Status>
+        <Date and Time>Fri Nov 20 08:46:47 2020</Date and Time>
+        <Lag Lag="388506794" />
+        <Log Log="589276343" />
+    </SenSor2>
+    <SenSor3 Id="45">
+        <Name>SenSor3</Name>
+        <Status>OPEN</Status>
+        <Date and Time>Fri Nov 20 08:46:47 2020</Date and Time>
+        <Lag Lag="466956541" />
+        <Log Log="363960186" />
+    </SenSor3>
+</Authors>
