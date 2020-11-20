@@ -31,11 +31,6 @@ class DataStruct
     public:
         char Name[20];
         int flag;
-       // char* SetName(char *arg);
-       // void SetID (int *arg);
-       // void SetCoordinate ();
-       // void SetStatus(char *arg);
         void Xuat();
         char* GetStatus();
-        
 };

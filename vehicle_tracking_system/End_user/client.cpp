@@ -5,6 +5,7 @@
 #include <unistd.h> 
 #include <string.h> 
 #include<pthread.h> 
+#include "define.hpp"
 #define MAX 100
 #define PORT 12345
 using namespace std;
@@ -13,12 +14,13 @@ char CHECK[MAX];
 void *mythread (void *arg)
 {
     int newarg = *(int*)(arg);
-    char buff[MAX];                                                                                                                                                                                                                                                      
+    DataSenSor buff;                                                                                                                                                                                                                                                      
     while(strncmp(CHECK,"exit",4)!=0)
     {
-        bzero(buff,sizeof(buff));
-        read(newarg,buff, sizeof(buff));
-        cout<<buff;
+        bzero(&buff,sizeof(buff));
+        read(newarg,&buff, sizeof(buff));
+        Xuat(&buff);
+        //cout<<buff.;
     }
 }                                                
 void func(int sockfd) 
@@ -40,13 +42,13 @@ void func(int sockfd)
 } 
 int main()
 {
-    pthread_t pth;
+    pthread_t pth; // recieve from VTS
     int sock = 0; //creat a socket
     sockaddr_in serv_addr; // creat server_addr
     memset(&serv_addr,0,sizeof(serv_addr));
     sock = socket(AF_INET,SOCK_STREAM, 0);
     // bind the add to socket
-    if(inet_pton(AF_INET, "192.168.1.6", &serv_addr.sin_addr)<=0)  
+    if(inet_pton(AF_INET, "192.168.122.1", &serv_addr.sin_addr)<=0)  
     { 
         cout<<"\nInvalid address/ Address not supported \n"; 
         return -1; 

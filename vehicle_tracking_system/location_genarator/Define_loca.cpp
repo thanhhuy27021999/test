@@ -140,6 +140,7 @@ void *Recv_from_ad (void *arg)
     while(1)
     {
         read(newsocket,&buffer,sizeof(buffer));
+        cout <<buffer<<"\n";
         if (!strncmp(buffer,"open1", sizeof("open1") - 1) && sensor[0].flag!=0)
         {
             sensor[0].flag = FALSE;

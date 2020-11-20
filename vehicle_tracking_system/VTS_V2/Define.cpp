@@ -134,17 +134,32 @@ void *My_thread (void *arg)
     struct sockaddr_in temp;
     temp = address;
     char buff[MAX]; 
-    char buff_T[MAX];
+    DataStruct buff_T;
 	int n; 
 	for (;;) 
     { 
 		bzero(buff, sizeof(buff)); 
         read(newarg, buff, sizeof(buff)); 
-        write(newarg, buff, sizeof(buff)); //tranfer data 
+        //cout << buff<<"\n";
+        if(!strncmp(buff,"SenSor1",sizeof("SenSor1")-1))
+        {
+            cout <<buff<<"\n";
+            write(newarg,&sensor[0],sizeof(DataStruct));
+        }
+        if(!strncmp(buff,"SenSor2",sizeof("SenSor2")-1))
+        {
+            cout <<buff<<"\n";
+            write(newarg,&sensor[1],sizeof(DataStruct));
+        }
+        if(!strncmp(buff,"SenSor3",sizeof("SenSor3")-1))
+        {
+            write(newarg,&sensor[2],sizeof(DataStruct));
+            cout <<buff<<"\n";
+        }
         if ((strncmp(buff, "CLOSE", (sizeof("CLOSE")-1))) == 0) 
         { 
 			printf("Client Exit...\n");
-            cnt--;
+            cnt_Client--;
             for(int i=0; i<30;i++)
             {
                 if(client_socket_client[i]==newarg)
@@ -161,7 +176,6 @@ void *My_thread (void *arg)
             close(newarg); 
 			break; 
 		}
-		bzero(buff, sizeof(buff_T)); 
 	}  
 }
 
@@ -234,35 +248,23 @@ void *End_user (void *arg)
         FD_ZERO(&readfds);   
         //add master socket to set  
         FD_SET(master_socket, &readfds);   
-        max_sd = master_socket;   
-             
-        //add child sockets to set
-        if(cnt!= 0 || escape != 0)
-        {
-            for ( i = 0 ; i < max_clients ; i++)   
-            {   
-                //socket descriptor  
-                sd = client_socket_client[i];   
+        max_sd = master_socket;    
+        for ( i = 0 ; i < max_clients ; i++)   
+        {   
+            //socket descriptor  
+            sd = client_socket_client[i];   
 
-                //if valid socket descriptor then add to read list  
-                if(sd > 0)   
-                FD_SET( sd , &readfds);   
-                 
-                //highest file descriptor number, need it for the select function  
-                if(sd > max_sd)   
-                max_sd = sd;   
-            } 
-        }  
-  
-     
+            //if valid socket descriptor then add to read list  
+            if(sd > 0)   
+            FD_SET( sd , &readfds);   
+                
+            //highest file descriptor number, need it for the select function  
+            if(sd > max_sd)   
+            max_sd = sd;   
+        } 
         //wait for an activity on one of the sockets , timeout is NULL ,  
         //so wait indefinitely  
-        activity = select( max_sd + 1 , &readfds , NULL , NULL , &timeout);   //block chuong trinh tai day de doi
-        if (activity == 0 && cnt==0 && escape==0)
-        {
-            close(master_socket);
-            break;
-        }     
+        activity = select( max_sd + 1 , &readfds , NULL , NULL , NULL);   //block chuong trinh tai day de doi
         if ((activity < 0) && (errno!=EINTR))   
         {   
             printf("select error");   
@@ -287,10 +289,10 @@ void *End_user (void *arg)
                 //if position is empty  
                 if( client_socket_client[i] == 0 )   
                 {   
-                    client_socket[i] = new_socket;   
+                    client_socket_client[i] = new_socket;   
                     pthread_create(&pt[i],NULL,My_thread,&new_socket);
-                    cnt++; //increase the number of threads
-                    escape = 0;
+                    cnt_Client++; //increase the number of threads
+                    escape_client = 0;
                     printf("Adding to list of sockets as %d\n" , i);   
                     break;   
                 }   
@@ -365,7 +367,6 @@ void *End_user_1 (void *arg)
          
     while(TRUE)   
     {   
-        timeout.tv_sec = 10;
         //clear the socket set  
         FD_ZERO(&readfds);   
         //add master socket to set  
@@ -373,32 +374,20 @@ void *End_user_1 (void *arg)
         max_sd = master_socket;   
              
         //add child sockets to set
-        if(cnt!= 0 || escape != 0)
-        {
-            for ( i = 0 ; i < max_clients ; i++)   
-            {   
-                //socket descriptor  
-                sd = client_socket[i];   
-
-                //if valid socket descriptor then add to read list  
-                if(sd > 0)   
-                FD_SET( sd , &readfds);   
-                 
-                //highest file descriptor number, need it for the select function  
-                if(sd > max_sd)   
-                max_sd = sd;   
-            } 
-        }  
-  
-     
+        for ( i = 0 ; i < max_clients ; i++)   
+        {   
+            //socket descriptor  
+            sd = client_socket[i];   
+            //if valid socket descriptor then add to read list  
+            if(sd > 0)   
+            FD_SET( sd , &readfds);   
+            //highest file descriptor number, need it for the select function  
+            if(sd > max_sd)   
+            max_sd = sd;   
+        } 
         //wait for an activity on one of the sockets , timeout is NULL ,  
         //so wait indefinitely  
-        activity = select( max_sd + 1 , &readfds , NULL , NULL , NULL);   //block chuong trinh tai day de doi
-        // if (activity == 0 && cnt==0 && escape==0)
-        // { 
-        //     close(master_socket);
-        //     break;
-        //}     
+        activity = select( max_sd + 1 , &readfds , NULL , NULL , NULL);   //block chuong trinh tai day de doi    
         if ((activity < 0) && (errno!=EINTR))   
         {   
             printf("select error");   
@@ -413,10 +402,8 @@ void *End_user_1 (void *arg)
             {   
                 perror("accept");   
                 exit(EXIT_FAILURE);   
-            }     
-                 
-            puts("Welcome message sent successfully");   
-                 
+            }        
+            puts("Welcome message sent successfully");         
             //add new socket to array of sockets  
             for (i = 0; i < max_clients; i++)   
             {   
@@ -435,28 +422,6 @@ void *End_user_1 (void *arg)
     }      
     return 0;   
 }
-
-                    /*Define function for class DataStruct*/
-
-// void DataStruct::SetCoordinate()
-// {
-//     longi = rand();
-//     lagi = rand();
-// }   
-// void DataStruct::SetID (int *arg)
-// {
-//     srand((int)time(0));
-//     *arg = rand();
-//     ID = (*arg);
-// }
-// char* DataStruct::SetName(char *arg)
-// {
-//     strcpy(Name,"Huy");
-// }
-//  void DataStruct::SetStatus(char*arg)
-// {
-//     strcpy(status,arg);
-// }
 
 void DataStruct:: Xuat() 
 {
