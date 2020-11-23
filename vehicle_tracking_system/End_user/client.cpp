@@ -15,13 +15,15 @@ void *mythread (void *arg)
 {
     int newarg = *(int*)(arg);
     DataSenSor buff;                                                                                                                                                                                                                                                      
-    while(strncmp(CHECK,"exit",4)!=0)
+    while(strncmp(CHECK,"exit",sizeof("exit")-1)!=0)
     {
         bzero(&buff,sizeof(buff));
         read(newarg,&buff, sizeof(buff));
+        cout <<"..."<<"\n";
         Xuat(&buff);
         //cout<<buff.;
     }
+    cout <<"Da exit Client"<<"\n";
 }                                                
 void func(int sockfd) 
 { 
@@ -35,7 +37,9 @@ void func(int sockfd)
 		write(sockfd, buff, sizeof(buff)); 
         if ((strncmp(buff, "exit", 4)) == 0) { 
             strcpy(CHECK,buff);
-			printf("Client Exit...\n"); 
+            //cout << buff<<"\n";
+            cout <<CHECK <<"\n";
+			//printf("Client Exit...\n"); 
 			break; 
 		}  
 	} 

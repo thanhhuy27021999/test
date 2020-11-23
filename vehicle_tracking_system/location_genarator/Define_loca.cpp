@@ -223,7 +223,7 @@ void *Write_Xml(void* arg)
             TiXmlText* Status_content = new TiXmlText(sensor[i].status);
             author_Status->LinkEndChild(Status_content);
 
-            TiXmlElement* author_Date_Time = new TiXmlElement("Date and Time");
+            TiXmlElement* author_Date_Time = new TiXmlElement("DateandTime");
             author->LinkEndChild(author_Date_Time);
             TiXmlText* Date_Time_content = new TiXmlText(buffer);
             author_Date_Time->LinkEndChild(Date_Time_content);

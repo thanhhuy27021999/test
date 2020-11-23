@@ -109,14 +109,20 @@ void *My_thread_1 (void *arg)
             if(!strncmp(buff.Name,"SenSor1",sizeof("SenSor1")-1))
             {
                 bzero(&sensor[0],sizeof(DataStruct));
+                strcpy(sensor[0].Name,"SenSor1");
+                strcpy(sensor[0].status,"CLOSE");
             }
             if (!strncmp(buff.Name,"SenSor2",sizeof("SenSor2")-1))
             {
                 bzero(&sensor[1],sizeof(DataStruct));
+                strcpy(sensor[0].Name,"SenSor2");
+                strcpy(sensor[0].status,"CLOSE");
             }
             if (!strncmp(buff.Name,"SenSor3",sizeof("SenSor3")-1))
             {
                 bzero(&sensor[2],sizeof(DataStruct));
+                strcpy(sensor[0].Name,"SenSor3");
+                strcpy(sensor[0].status,"CLOSE");
             }
                 close(newarg); 
                 break;         
@@ -141,6 +147,19 @@ void *My_thread (void *arg)
 		bzero(buff, sizeof(buff)); 
         read(newarg, buff, sizeof(buff)); 
         //cout << buff<<"\n";
+        if(!strncmp(buff,"GetSenSor",sizeof("GetSenSor")-1))
+        {
+            cout<<buff<<"\n";
+            int i =0;
+            while (i<3)
+            {
+                if(!strncmp(sensor[i].status,"OPEN", sizeof("OPEN")-1))
+                {
+                    write(newarg,&sensor[i],sizeof(DataStruct));
+                }
+                i++;
+            }
+        }
         if(!strncmp(buff,"SenSor1",sizeof("SenSor1")-1))
         {
             cout <<buff<<"\n";
@@ -156,7 +175,7 @@ void *My_thread (void *arg)
             write(newarg,&sensor[2],sizeof(DataStruct));
             cout <<buff<<"\n";
         }
-        if ((strncmp(buff, "CLOSE", (sizeof("CLOSE")-1))) == 0) 
+        if (!strncmp(buff, "exit", sizeof("exit")-1))
         { 
 			printf("Client Exit...\n");
             cnt_Client--;
@@ -173,6 +192,7 @@ void *My_thread (void *arg)
                     break;
                 }
             }
+            write(newarg,"exit",sizeof("exit"));
             close(newarg); 
 			break; 
 		}
@@ -293,7 +313,7 @@ void *End_user (void *arg)
                     pthread_create(&pt[i],NULL,My_thread,&new_socket);
                     cnt_Client++; //increase the number of threads
                     escape_client = 0;
-                    printf("Adding to list of sockets as %d\n" , i);   
+                    printf("Adding user to list of sockets as %d\n" , i);   
                     break;   
                 }   
             }   
@@ -414,7 +434,7 @@ void *End_user_1 (void *arg)
                     pthread_create(&pt[i],NULL,My_thread_1,&new_socket);
                     cnt++; //increase the number of threads
                     escape = 0;
-                    printf("Adding to list of sockets as %d\n" , i);   
+                    printf("Adding Sensor to list of sockets as %d\n" , i);   
                     break;   
                 }   
             }   
@@ -477,7 +497,7 @@ void *Write_Xml(void* arg)
             TiXmlText* Status_content = new TiXmlText(sensor[i].status);
             author_Status->LinkEndChild(Status_content);
 
-            TiXmlElement* author_Date_Time = new TiXmlElement("Date and Time");
+            TiXmlElement* author_Date_Time = new TiXmlElement("DateandTime");
             author->LinkEndChild(author_Date_Time);
             TiXmlText* Date_Time_content = new TiXmlText(buffer);
             author_Date_Time->LinkEndChild(Date_Time_content);
