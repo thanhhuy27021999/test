@@ -52,6 +52,8 @@ void *Add_Sensor(void *arg)
         temp->longi = 0;
         temp->ID = 0;
         write(sock,temp,sizeof(DataStruct));
+        bzero(temp,sizeof(DataStruct));
+        temp->SetStatus(status_exit);
     }
     close(sock);
 }
@@ -150,15 +152,34 @@ void *Recv_from_ad (void *arg)
             strcpy(temp,strtok(NULL,s));
             strncpy(Name,temp,strnlen(temp, 20)-1);
             cout << Name <<"\n";
+            int flag;
             for (int i = 0; i<30; i++)
             {
                 if(!strncmp(sensor[i].status,"CLOSE",sizeof("CLOSE")-1))
                 {
-                    cout <<i << "\n";
-                    strcpy(sensor[i].Name,Name);
-                    cout <<sensor[i].Name<< "\n";
-                    sensor[i].flag=0;
-                    pthread_create(&sensor1_thread[i],NULL,Add_Sensor,&sensor[i]);
+                    for(int j =0 ; j<30;j++)
+                    {
+                        if(!strncmp(sensor[j].Name,Name,sizeof(Name)))
+                        {
+                            cout << "Name existed. Plese enter the other name \n";
+                            flag = 1;
+                            break;
+                        }
+                        else
+                        {
+                            flag = 0;
+                        }
+                        
+                    }
+                    if(flag ==0)
+                    {
+                        cout <<i << "\n";
+                        strcpy(sensor[i].Name,Name);
+                        cout <<sensor[i].Name<< "\n";
+                        sensor[i].flag=0;
+                        pthread_create(&sensor1_thread[i],NULL,Add_Sensor,&sensor[i]);
+                        break;
+                    }
                     break;
                 }
             }
@@ -170,10 +191,10 @@ void *Recv_from_ad (void *arg)
             char temp[20];
             strtok(buffer, s);
             strcpy(temp,strtok(NULL,s));
-            strncpy(Name,temp,strnlen(temp, 20)-1);
+            strcpy(Name,temp);
             for(int i = 0 ; i<30; i++)
             {
-                if(!strncmp(sensor[i].Name,Name,sizeof(Name)))
+                if(!strncmp(sensor[i].Name,Name,strlen(Name)-1))
                 {
                     cout << sensor[i].Name<< "\n";
                     sensor[i].flag = 1;

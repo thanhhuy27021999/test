@@ -128,6 +128,8 @@ void *My_thread_1 (void *arg)
                     cout <<"Da exit....  "<<buff.Name<<"\n";
                     cnt--;
                     cout <<cnt<<"\n";
+                    bzero(&sensor[i],sizeof(DataStruct));
+                    strcpy(sensor[i].status,"CLOSE");
                     for(int i=0; i<30;i++)
                     {
                         if(client_socket[i]==newarg)
@@ -141,7 +143,6 @@ void *My_thread_1 (void *arg)
                             break;
                         }
                     }
-                    bzero(&sensor[i],sizeof(DataStruct));
                     close(newarg); 
                     return 0;
                 }
