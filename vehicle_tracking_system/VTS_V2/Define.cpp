@@ -16,7 +16,7 @@ int escape;
 int client_socket[30];
 struct sockaddr_in address;   
 struct timeval timeout;
-DataStruct sensor[3];
+DataStruct sensor[30];
 using namespace std;
 
 void *Admin_th (void *arg)
@@ -58,6 +58,36 @@ void func(int sockfd)
 		n = 0; 
 		while ((buff[n++] = getchar()) != '\n'); 
 		write(sockfd, buff, sizeof(buff));  
+        if(!strncmp(buff,"GetSenSor",sizeof("GetSenSor")-1))
+        {
+            cout << "Name    ID"<<"\n";
+            for (int i =0;i<30;i++)
+            {
+                if(!strncmp(sensor[i].status,"OPEN",sizeof("OPEN")-1))
+                {
+                    cout <<sensor[i].Name <<"     "<<sensor[i].ID<< "\n";
+                }
+            }
+        }
+
+        if(!strncmp(buff,"take",sizeof("take")-1))
+        {
+            char Name[100];
+            char s[] = "=>";
+            //cout << ".... \n";
+            strtok(buff, s);
+            //cout << s<< "\n";
+            char temp[20];
+            strcpy(temp,strtok(NULL,s));
+            strncpy(Name,temp,strnlen(temp, 20)-1);
+            for(int i = 0; i<30; i++)
+            {
+                if(!strncmp(sensor[i].Name,Name, sizeof(Name)))
+                {
+                    sensor[i].Xuat();
+                }
+            }
+        }
 	} 
 } 
 
@@ -70,64 +100,54 @@ void *My_thread_1 (void *arg)
     char *message  = "OKE";
     //char buff_T[MAX];
 	int n; 
+    bzero(&buff, sizeof(buff)); 
+    read(newarg, &buff, sizeof(buff)); 
+    for (int i=0; i<30;i++)
+    {
+        if (!strncmp(sensor[i].status,"CLOSE",sizeof("CLOSE")-1))
+        {
+            buff.Xuat();
+            sensor[i]=buff;
+            break;
+        }
+    }     
+    write(newarg,message,sizeof(message));
+
+
 	for (;;) 
     { 
 		bzero(&buff, sizeof(buff)); 
         read(newarg, &buff, sizeof(buff)); 
-        if(!strncmp(buff.Name,"SenSor1",sizeof("SenSor1")-1))
+        for (int i=0; i<30;i++)
         {
-            sensor[0] = buff;
+            if (!strncmp(sensor[i].Name,buff.Name,sizeof(buff.Name)-1))
+            {
+                sensor[i]=buff;
+                if(!strncmp(buff.status, "CLOSE",sizeof("CLOSE")-1))
+                {
+                    cout <<"Da exit....  "<<buff.Name<<"\n";
+                    cnt--;
+                    cout <<cnt<<"\n";
+                    for(int i=0; i<30;i++)
+                    {
+                        if(client_socket[i]==newarg)
+                        {
+                            for(int j=i;j<30;j++)
+                            {
+                                int a;
+                                a= j+1;
+                                client_socket[j] = client_socket[a];
+                            }
+                            break;
+                        }
+                    }
+                    bzero(&sensor[i],sizeof(DataStruct));
+                    close(newarg); 
+                    return 0;
+                }
+                break;
+            }
         }
-        if (!strncmp(buff.Name,"SenSor2",sizeof("SenSor2")-1))
-        {
-            sensor[1] = buff;
-        }
-        if (!strncmp(buff.Name,"SenSor3",sizeof("SenSor3")-1))
-        {
-            sensor[2] = buff;
-        }
-        //char buff_temp[20];
-       // buff_temp = buff.GetStatus();
-        if(!strncmp(buff.status, "CLOSE",sizeof("CLOSE")-1))
-        {
-            cout <<"Da exit....  "<<buff.Name<<"\n";
-            cnt--;
-            cout <<cnt<<"\n";
-            for(int i=0; i<30;i++)
-            {
-                 if(client_socket[i]==newarg)
-                 {
-                     for(int j=i;j<30;j++)
-                     {
-                         int a;
-                         a= j+1;
-                         client_socket[j] = client_socket[a];
-                     }
-                     break;
-                 }
-             }
-            if(!strncmp(buff.Name,"SenSor1",sizeof("SenSor1")-1))
-            {
-                bzero(&sensor[0],sizeof(DataStruct));
-                strcpy(sensor[0].Name,"SenSor1");
-                strcpy(sensor[0].status,"CLOSE");
-            }
-            if (!strncmp(buff.Name,"SenSor2",sizeof("SenSor2")-1))
-            {
-                bzero(&sensor[1],sizeof(DataStruct));
-                strcpy(sensor[0].Name,"SenSor2");
-                strcpy(sensor[0].status,"CLOSE");
-            }
-            if (!strncmp(buff.Name,"SenSor3",sizeof("SenSor3")-1))
-            {
-                bzero(&sensor[2],sizeof(DataStruct));
-                strcpy(sensor[0].Name,"SenSor3");
-                strcpy(sensor[0].status,"CLOSE");
-            }
-                close(newarg); 
-                break;         
-            }
-
         write(newarg,message,sizeof(message));
 		bzero(&buff, sizeof(buff)); 
 	}  
@@ -146,34 +166,35 @@ void *My_thread (void *arg)
     { 
 		bzero(buff, sizeof(buff)); 
         read(newarg, buff, sizeof(buff)); 
-        //cout << buff<<"\n";
+        cout << buff<<"\n";
         if(!strncmp(buff,"GetSenSor",sizeof("GetSenSor")-1))
         {
-            cout<<buff<<"\n";
-            int i =0;
-            while (i<3)
+            cout <<buff<<"\n";
+            for (int i=0;i<30;i++)
             {
-                if(!strncmp(sensor[i].status,"OPEN", sizeof("OPEN")-1))
+                if(!strncmp(sensor[i].status,"OPEN",sizeof("OPEN")-1))
                 {
                     write(newarg,&sensor[i],sizeof(DataStruct));
                 }
-                i++;
             }
         }
-        if(!strncmp(buff,"SenSor1",sizeof("SenSor1")-1))
+        if(!strncmp(buff,"take",sizeof("take")-1))
         {
-            cout <<buff<<"\n";
-            write(newarg,&sensor[0],sizeof(DataStruct));
-        }
-        if(!strncmp(buff,"SenSor2",sizeof("SenSor2")-1))
-        {
-            cout <<buff<<"\n";
-            write(newarg,&sensor[1],sizeof(DataStruct));
-        }
-        if(!strncmp(buff,"SenSor3",sizeof("SenSor3")-1))
-        {
-            write(newarg,&sensor[2],sizeof(DataStruct));
-            cout <<buff<<"\n";
+            char Name[100];
+            char s[] = "=>";
+            //cout << ".... \n";
+            strtok(buff, s);
+            //cout << s<< "\n";
+            char temp[20];
+            strcpy(temp,strtok(NULL,s));
+            strncpy(Name,temp,strnlen(temp, 20)-1);
+            for(int i = 0; i<30; i++)
+            {
+                if(!strncmp(sensor[i].Name,Name, sizeof(Name)))
+                {
+                    write(newarg,&sensor[i],sizeof(DataStruct));
+                }
+            }
         }
         if (!strncmp(buff, "exit", sizeof("exit")-1))
         { 
@@ -198,7 +219,6 @@ void *My_thread (void *arg)
 		}
 	}  
 }
-
 
 void *End_user (void *arg)
 {
@@ -259,7 +279,7 @@ void *End_user (void *arg)
          
     //accept the incoming connection  
     addrlen = sizeof(address);   
-    puts("Waiting for connections from user ...");   
+    cout << "Waiting for connections from user ... \n";   
          
     while(TRUE)   
     {   
@@ -301,7 +321,7 @@ void *End_user (void *arg)
                 exit(EXIT_FAILURE);   
             }     
                  
-            puts("Welcome message sent successfully");   
+            cout << "Welcome message sent successfully \n";   
                  
             //add new socket to array of sockets  
             for (i = 0; i < max_clients; i++)   
@@ -324,9 +344,10 @@ void *End_user (void *arg)
 
 void *End_user_1 (void *arg)
 {
-    strcpy(sensor[0].Name,"SenSor1");
-    strcpy(sensor[1].Name,"SenSor2");
-    strcpy(sensor[2].Name,"SenSor3");
+    for(int i =0; i<30;i++)
+    {
+        strcpy(sensor[i].status,"CLOSE");
+    }
     escape = 1;
     cnt = 0;
     int opt = TRUE;   
@@ -383,7 +404,7 @@ void *End_user_1 (void *arg)
          
     //accept the incoming connection  
     addrlen = sizeof(address);   
-    puts("Waiting for connections from location gernerator ...");   
+    cout << "Waiting for connections from location gernerator ... \n ";   
          
     while(TRUE)   
     {   
@@ -423,7 +444,7 @@ void *End_user_1 (void *arg)
                 perror("accept");   
                 exit(EXIT_FAILURE);   
             }        
-            puts("Welcome message sent successfully");         
+            cout << "Welcome message sent successfully \n";         
             //add new socket to array of sockets  
             for (i = 0; i < max_clients; i++)   
             {   
@@ -478,40 +499,42 @@ void *Write_Xml(void* arg)
         char* Time = ctime(&now);
         char buffer[20];
         strncpy(buffer,Time,(strnlen(Time,50)-1));
-        for(int i=0; i<3;i++)
+        for(int i=0; i<30;i++)
         {
-            //Tạo Author1
-            TiXmlElement* author = new TiXmlElement(sensor[i].Name);
-            //Set id cho author1
-            author->SetAttribute("Id", sensor[i].ID);
-            //Thêm author1 vào root
-            root->LinkEndChild(author);
-            //Tạo node Name 
-            TiXmlElement* author_name = new TiXmlElement("Name");
-            author->LinkEndChild(author_name);
-            TiXmlText* name_content = new TiXmlText(sensor[i].Name);
-            author_name->LinkEndChild(name_content);
+            if(!strncmp(sensor[i].status,"OPEN",sizeof("OPEN")-1))
+            {
+                //Tạo Author1
+                TiXmlElement* author = new TiXmlElement(sensor[i].Name);
+                //Set id cho author1
+                author->SetAttribute("Id", sensor[i].ID);
+                //Thêm author1 vào root
+                root->LinkEndChild(author);
+                //Tạo node Name 
+                TiXmlElement* author_name = new TiXmlElement("Name");
+                author->LinkEndChild(author_name);
+                TiXmlText* name_content = new TiXmlText(sensor[i].Name);
+                author_name->LinkEndChild(name_content);
 
-            TiXmlElement* author_Status = new TiXmlElement("Status");
-            author->LinkEndChild(author_Status);
-            TiXmlText* Status_content = new TiXmlText(sensor[i].status);
-            author_Status->LinkEndChild(Status_content);
+                TiXmlElement* author_Status = new TiXmlElement("Status");
+                author->LinkEndChild(author_Status);
+                TiXmlText* Status_content = new TiXmlText(sensor[i].status);
+                author_Status->LinkEndChild(Status_content);
 
-            TiXmlElement* author_Date_Time = new TiXmlElement("DateandTime");
-            author->LinkEndChild(author_Date_Time);
-            TiXmlText* Date_Time_content = new TiXmlText(buffer);
-            author_Date_Time->LinkEndChild(Date_Time_content);
+                TiXmlElement* author_Date_Time = new TiXmlElement("DateandTime");
+                author->LinkEndChild(author_Date_Time);
+                TiXmlText* Date_Time_content = new TiXmlText(buffer);
+                author_Date_Time->LinkEndChild(Date_Time_content);
 
-            TiXmlElement* author_lag = new TiXmlElement("Lag");
-            author_lag->SetAttribute("Lag",sensor[i].lagi);
-            author->LinkEndChild(author_lag);
-            TiXmlElement* author_log = new TiXmlElement("Log");
-            author_log->SetAttribute("Log",sensor[i].longi);
-            author->LinkEndChild(author_log);    
+                TiXmlElement* author_lag = new TiXmlElement("Lag");
+                author_lag->SetAttribute("Lag",sensor[i].lagi);
+                author->LinkEndChild(author_lag);
+                TiXmlElement* author_log = new TiXmlElement("Log");
+                author_log->SetAttribute("Log",sensor[i].longi);
+                author->LinkEndChild(author_log); 
+            }
         }
         doc.SaveFile("Authors_Write.xml");
         sleep(5);
     }
-   
 	return 0;    
 }

@@ -10,6 +10,7 @@
 #define PORT 12345
 using namespace std;
 char CHECK[MAX];
+int flag;
 
 void *mythread (void *arg)
 {
@@ -19,9 +20,14 @@ void *mythread (void *arg)
     {
         bzero(&buff,sizeof(buff));
         read(newarg,&buff, sizeof(buff));
-        cout <<"..."<<"\n";
-        Xuat(&buff);
-        //cout<<buff.;
+        if(flag)
+        {
+            cout << buff.Name <<"        "<<buff.ID<<"\n";
+        }
+        else
+        {
+            Xuat(&buff);
+        }
     }
     cout <<"Da exit Client"<<"\n";
 }                                                
@@ -34,6 +40,15 @@ void func(int sockfd)
 		//printf("Me: "); 
 		n = 0; 
 		while ((buff[n++] = getchar()) != '\n'); 
+        if(!strncmp(buff,"GetSenSor",sizeof("GetSenSor")-1))
+        {
+            flag = 1;
+            cout<<"Name         ID \n";
+        }  
+        else
+        {
+            flag = 0;
+        }
 		write(sockfd, buff, sizeof(buff)); 
         if ((strncmp(buff, "exit", 4)) == 0) { 
             strcpy(CHECK,buff);
@@ -41,7 +56,9 @@ void func(int sockfd)
             cout <<CHECK <<"\n";
 			//printf("Client Exit...\n"); 
 			break; 
-		}  
+		}
+
+        
 	} 
 } 
 int main()
